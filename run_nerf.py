@@ -554,6 +554,9 @@ def train():
                                                             final_height=288)
 
         i_test = [1]
+        # MAKE THE RENDERED VIDEO THE TEST POSE
+        #render_poses = poses[1:2, :, :]
+
         print(images.shape, poses.shape, bds.shape, render_poses.shape, i_test)
 
         hwf = poses[0,:3,-1]
