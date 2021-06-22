@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm, trange
+from pdb import set_trace
 
 import matplotlib.pyplot as plt
 
@@ -539,9 +540,22 @@ def train():
     # Load data
     K = None
     if args.dataset_type == 'llff':
-        images, poses, bds, render_poses, i_test = load_llff_data(args.datadir, args.factor,
-                                                                  recenter=True, bd_factor=.75,
-                                                                  spherify=args.spherify)
+        # images, poses, bds, render_poses, i_test = load_llff_data(args.datadir, args.factor,
+        #                                                           recenter=True, bd_factor=.75,
+        #                                                           spherify=args.spherify)
+
+        images, depths, masks, poses, bds, \
+        render_poses, ref_c2w, motion_coords = load_llff_data(args.datadir,
+                                                            0, 3,
+                                                            args.factor,
+                                                            target_idx=0,
+                                                            recenter=True, bd_factor=.9,
+                                                            spherify=args.spherify,
+                                                            final_height=288)
+
+        i_test = [1]
+        print(images.shape, poses.shape, bds.shape, render_poses.shape, i_test)
+
         hwf = poses[0,:3,-1]
         poses = poses[:,:3,:4]
         print('Loaded llff', images.shape, render_poses.shape, hwf, args.datadir)
@@ -873,6 +887,9 @@ def train():
 
 
 if __name__=='__main__':
-    torch.set_default_tensor_type('torch.cuda.FloatTensor')
+    if torch.cuda.is_available():
+        torch.set_default_tensor_type('torch.cuda.FloatTensor')
+    else:
+        torch.set_default_tensor_type('torch.FloatTensor')
 
     train()

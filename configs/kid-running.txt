@@ -1,0 +1,22 @@
+expname = kid-running_test
+basedir = ./logs
+datadir = ./nerf_data/kid-running/dense
+dataset_type = llff
+
+# downsampling factor to speed up rendering, set 4 or 8 for fast preview
+factor = 8
+# will take every 1/N images as LLFF test set. Setting to 0 lets me set the test set manually
+llffhold = 0
+
+# batch size (number of random rays per gradient step)
+N_rand = 1024
+# number of coarse samples per ray
+N_samples = 64
+# number of additional fine samples per ray
+N_importance = 64
+
+# use full 5D input instead of 3D
+use_viewdirs = True
+# std dev of noise added to regularize sigma_a output, 1e0 recommended
+raw_noise_std = 1e0
+
