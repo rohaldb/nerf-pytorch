@@ -432,6 +432,9 @@ def render_rays(img_idx,
         z_vals, _ = torch.sort(torch.cat([z_vals, z_samples], -1), -1)
         pts = rays_o[...,None,:] + rays_d[...,None,:] * z_vals[...,:,None] # [N_rays, N_samples + N_importance, 3]
 
+        img_idx_rep = torch.ones_like(pts[:, :, 0:1]) * img_idx
+        pts = torch.cat([pts, img_idx_rep], -1)
+
         run_fn = network_fn if network_fine is None else network_fine
 #         raw = run_network(pts, fn=run_fn)
         raw = network_query_fn(pts, viewdirs, run_fn)
