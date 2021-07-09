@@ -546,32 +546,30 @@ def train():
 
         images, depths, masks, poses, bds, \
         render_poses, ref_c2w, motion_coords = load_llff_data(args.datadir,
-                                                            0, 3,
+                                                            8, 11,
                                                             args.factor,
                                                             target_idx=0,
                                                             recenter=True, bd_factor=.9,
                                                             spherify=args.spherify,
                                                             final_height=288)
 
-        i_test = [1]
-        # MAKE THE RENDERED VIDEO THE TEST POSE
-        #render_poses = poses[1:2, :, :]
-
-        print(images.shape, poses.shape, bds.shape, render_poses.shape, i_test)
-
         hwf = poses[0,:3,-1]
         poses = poses[:,:3,:4]
         print('Loaded llff', images.shape, render_poses.shape, hwf, args.datadir)
-        if not isinstance(i_test, list):
-            i_test = [i_test]
+        # if not isinstance(i_test, list):
+        #     i_test = [i_test]
 
         if args.llffhold > 0:
             print('Auto LLFF holdout,', args.llffhold)
             i_test = np.arange(images.shape[0])[::args.llffhold]
 
+        # i_val = i_test
+        # i_train = np.array([i for i in np.arange(int(images.shape[0])) if
+        #                 (i not in i_test and i not in i_val)])
+        i_train = [0, 1, 2]
+        i_test = [0, 1, 2]
         i_val = i_test
-        i_train = np.array([i for i in np.arange(int(images.shape[0])) if
-                        (i not in i_test and i not in i_val)])
+        print(images.shape, poses.shape, bds.shape, render_poses.shape, i_test)
 
         print('DEFINING BOUNDS')
         if args.no_ndc:
@@ -715,7 +713,7 @@ def train():
         rays_rgb = torch.Tensor(rays_rgb).to(device)
 
 
-    N_iters = 200000 + 1
+    N_iters = 10000 + 1
     print('Begin')
     print('TRAIN views are', i_train)
     print('TEST views are', i_test)
