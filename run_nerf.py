@@ -168,12 +168,40 @@ def render_path(render_poses, hwf, K, chunk, render_kwargs, gt_imgs=None, savedi
             rgb8 = to8b(rgbs[-1])
             filename = os.path.join(savedir, '{:03d}.png'.format(i))
             imageio.imwrite(filename, rgb8)
-
+            depth8 = to8b(normalize_depth(disp).cpu().numpy())
+            filename = os.path.join(savedir, '{:03d}-depth.png'.format(i))
+            imageio.imwrite(filename, depth8)
 
     rgbs = np.stack(rgbs, 0)
     disps = np.stack(disps, 0)
 
     return rgbs, disps
+
+
+def normalize_depth(depth):
+    # depth_sm = depth - torch.min(depth)
+    return torch.clamp(depth / percentile(depth, 97), 0., 1.)
+
+
+def percentile(t, q):
+    """
+    Return the ``q``-th percentile of the flattened input tensor's data.
+
+    CAUTION:
+     * Needs PyTorch >= 1.1.0, as ``torch.kthvalue()`` is used.
+     * Values are not interpolated, which corresponds to
+       ``numpy.percentile(..., interpolation="nearest")``.
+
+    :param t: Input tensor.
+    :param q: Percentile to compute, which must be between 0 and 100 inclusive.
+    :return: Resulting value (scalar).
+    """
+    # Note that ``kthvalue()`` works one-based, i.e. the first sorted value
+    # indeed corresponds to k=1, not k=0! Use float(q) instead of q directly,
+    # so that ``round()`` returns an integer, even if q is a np.float32.
+    k = 1 + round(.01 * float(q) * (t.numel() - 1))
+    result = t.view(-1).kthvalue(k).values.item()
+    return result
 
 
 def create_nerf(args):
